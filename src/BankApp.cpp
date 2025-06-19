@@ -1,5 +1,6 @@
 #include "../include/BankApp.h"
 #include "../include/Database.h"
+#include "../include/Admin.h"
 #include "../include/Transaction.h"
 #include <iostream>
 #include <limits>
@@ -40,6 +41,21 @@ void BankApp::run() {
                 handleCustomerRegistration();
                 break;
             case 3:
+                // Admin login
+                {
+                    std::string username, password;
+                    std::cout << "Enter admin username: ";
+                    std::getline(std::cin, username);
+                    std::cout << "Enter admin password: ";
+                    std::getline(std::cin, password);
+                    if (Admin::authenticate(username, password)) {
+                        Admin::showMenu();
+                    } else {
+                        std::cout << "Invalid admin credentials.\n";
+                    }
+                }
+                break;
+            case 4:
                 std::cout << "Thank you for using " << bankName << "!" << std::endl;
                 return;
             default:
@@ -57,7 +73,8 @@ void BankApp::displayMainMenu() {
     std::cout << "│                             │" << std::endl;
     std::cout << "│  1. Login                   │" << std::endl;
     std::cout << "│  2. Register                │" << std::endl;
-    std::cout << "│  3. Exit                    │" << std::endl;
+    std::cout << "│  3. Admin Login             │" << std::endl;
+    std::cout << "│  4. Exit                    │" << std::endl;
     std::cout << "│                             │" << std::endl;
     std::cout << "└─x─x─x─x─x─x─x─x─x─x─x─x─x─x─┘\n" << std::endl;
     std::cout << "Enter Your Choice: ";

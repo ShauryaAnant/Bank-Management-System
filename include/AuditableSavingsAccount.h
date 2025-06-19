@@ -18,7 +18,6 @@ private:
 
 public:
     AuditableSavingsAccount(int accNo, double initialBalance, Customer* owner,
-                           double interestRate = SavingsAccount::getDefaultInterestRate(),
                            const std::string& logFileName = "savings_audit.log");
     
     bool deposit(double amount) override;

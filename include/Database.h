@@ -80,6 +80,8 @@ public:
     // Data persistence
     void saveAll();
     void loadAll();
+    void savePolicy() const;
+    void loadPolicy();
     
     // Static helper methods
     static bool verifyPassword(int accountNumber, const std::string& password);
@@ -88,6 +90,9 @@ public:
     static int getNextAccountNumber();
     static void incrementCustomerId();
     static void incrementAccountNumber();
+    
+    // Getter for customers
+    const std::unordered_map<int, std::unique_ptr<Customer>>& getCustomers() const;
     
     ~Database();
 };

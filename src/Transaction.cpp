@@ -1,6 +1,8 @@
 #include "../include/Transaction.h"
 #include "../include/Database.h"
 #include "../include/Account.h"
+#include "../include/BankPolicy.h"
+#include "../include/AuditableSavingsAccount.h"
 #include <iostream>
 #include <iomanip>
 #include <limits>
@@ -85,7 +87,9 @@ void transactionFun(int accountNumber) {
         std::cout << "│  4. Check Balance           │" << std::endl;
         std::cout << "│  5. Statement               │" << std::endl;
         std::cout << "│  6. Close Account           │" << std::endl;
-        std::cout << "│  7. Return to Main Menu     │" << std::endl;
+        std::cout << "│  7. View Account Details    │" << std::endl;
+        std::cout << "│  8. Apply Monthly Update    │" << std::endl;
+        std::cout << "│  9. Return to Main Menu     │" << std::endl;
         std::cout << "│                             │" << std::endl;
         std::cout << "└─x─x─x─x─x─x─x─x─x─x─x─x─x─x─┘" << std::endl << std::endl;
         std::cout << "Enter your choice: ";
@@ -224,7 +228,55 @@ void transactionFun(int accountNumber) {
                 std::cin.get();
                 return;
             }
-            case 7: // Return to Main Menu
+            case 7: { // View Account Details
+                auto account = Database::getAccount(accountNumber);
+                if (!account) {
+                    std::cout << "Account not found.\n";
+                    break;
+                }
+                std::cout << "\n--- Account Details ---\n";
+                std::cout << "Account Number: " << account->getAccountNumber() << "\n";
+                std::cout << "Account Type: " << account->getTypeString() << "\n";
+                std::cout << "Current Balance: $" << std::fixed << std::setprecision(2) << account->getBalance() << "\n";
+                if (account->getType() == AccountType::SAVINGS) {
+                    std::cout << "Interest Rate: " << BankPolicy::getSavingsInterestRate() * 100 << "%\n";
+                } else if (account->getType() == AccountType::CURRENT) {
+                    std::cout << "Monthly Fee: $" << BankPolicy::getCurrentAccountFee() << "\n";
+                } else if (account->getType() == AccountType::AUDITABLE_SAVINGS) {
+                    std::cout << "Interest Rate: " << BankPolicy::getAuditableInterestRate() * 100 << "%\n";
+                    // Show audit log if available
+                    auto auditable = dynamic_cast<AuditableSavingsAccount*>(account);
+                    if (auditable) {
+                        std::cout << "--- Audit Log ---\n";
+                        for (const auto& entry : auditable->getAuditLog()) {
+                            std::cout << entry.timestamp << " | " << entry.action << " | Amount: $" << entry.amount << " | Balance: $" << entry.balance << "\n";
+                        }
+                    }
+                }
+                break;
+            }
+            case 8: { // Apply Monthly Update
+                auto account = Database::getAccount(accountNumber);
+                if (!account) {
+                    std::cout << "Account not found.\n";
+                    break;
+                }
+                try {
+                    account->applyMonthlyUpdate();
+                    std::cout << "Monthly update applied. New balance: $" << std::fixed << std::setprecision(2) << account->getBalance() << "\n";
+                    if (account->getType() == AccountType::AUDITABLE_SAVINGS) {
+                        auto auditable = dynamic_cast<AuditableSavingsAccount*>(account);
+                        if (auditable && !auditable->getAuditLog().empty()) {
+                            const auto& entry = auditable->getAuditLog().back();
+                            std::cout << "Latest Audit Log: " << entry.timestamp << " | " << entry.action << " | Amount: $" << entry.amount << " | Balance: $" << entry.balance << "\n";
+                        }
+                    }
+                } catch (const std::exception& e) {
+                    std::cout << "Error applying monthly update: " << e.what() << "\n";
+                }
+                break;
+            }
+            case 9:
                 return;
             default:
                 std::cout << "Invalid choice. Please try again.\n";
@@ -411,5 +463,5 @@ bool Transfer::undo() {
         fromAccount->deposit(amount);
         return true;
     }
-    return false;
-} 
+    return false; 
+}

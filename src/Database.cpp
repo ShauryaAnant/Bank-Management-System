@@ -3,6 +3,7 @@
 #include "../include/CurrentAccount.h"
 #include "../include/AuditableSavingsAccount.h"
 #include "../include/Transaction.h"
+#include "../include/BankPolicy.h"
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -469,6 +470,7 @@ void Database::saveAll() {
         saveAccount(nullptr);  // Save all accounts
         saveAuthData();
         saveCounters();
+        savePolicy();
     } catch (const std::exception& e) {
         throw std::runtime_error("Failed to save all data: " + std::string(e.what()));
     }
@@ -481,6 +483,7 @@ void Database::loadAll() {
         // loadTransactions();
         loadAuthData();
         loadCounters();
+        loadPolicy();
     } catch (const std::exception& e) {
         throw std::runtime_error("Failed to load data: " + std::string(e.what()));
     }
@@ -596,12 +599,10 @@ void Database::loadAccounts() {
         std::getline(ss, balance, ':');
         std::getline(ss, ownerId, ':');
         std::getline(ss, type);
-        
         Customer* owner = findCustomer(std::stoi(ownerId));
         if (!owner) {
             continue;
         }
-        
         std::unique_ptr<Account> account;
         switch (std::stoi(type)) {
             case static_cast<int>(AccountType::SAVINGS):
@@ -609,7 +610,6 @@ void Database::loadAccounts() {
                     std::stoi(number),
                     std::stod(balance),
                     owner,
-                    SavingsAccount::getDefaultInterestRate(),
                     AccountType::SAVINGS
                 );
                 break;
@@ -630,11 +630,7 @@ void Database::loadAccounts() {
             default:
                 continue;
         }
-        
-        // First add to customer's accounts
         owner->addAccount(std::move(account));
-        
-        // Then get the pointer from the customer's accounts
         Account* accountPtr = owner->findAccount(std::stoi(number));
         if (accountPtr) {
             accounts[accountPtr->getAccountNumber()] = accountPtr;
@@ -814,10 +810,9 @@ std::unique_ptr<Account> Database::createSavingsAccount(int customerId, double i
     if (!customer) {
         throw std::runtime_error("Customer not found");
     }
-    
     int accountNumber = getNextAccountNumber();
     incrementAccountNumber();
-    return std::make_unique<SavingsAccount>(accountNumber, initialBalance, customer, SavingsAccount::getDefaultInterestRate(), AccountType::SAVINGS);
+    return std::make_unique<SavingsAccount>(accountNumber, initialBalance, customer, AccountType::SAVINGS);
 }
 
 std::unique_ptr<Account> Database::createCurrentAccount(int customerId, double initialBalance) {
@@ -825,7 +820,6 @@ std::unique_ptr<Account> Database::createCurrentAccount(int customerId, double i
     if (!customer) {
         throw std::runtime_error("Customer not found");
     }
-    
     int accountNumber = getNextAccountNumber();
     incrementAccountNumber();
     return std::make_unique<CurrentAccount>(accountNumber, initialBalance, customer);
@@ -836,10 +830,21 @@ std::unique_ptr<Account> Database::createAuditableSavingsAccount(int customerId,
     if (!customer) {
         throw std::runtime_error("Customer not found");
     }
-    
     int accountNumber = getNextAccountNumber();
     incrementAccountNumber();
     return std::make_unique<AuditableSavingsAccount>(accountNumber, initialBalance, customer);
+}
+
+void Database::savePolicy() const {
+    BankPolicy::saveToFile(dataDir + "/policy.txt");
+}
+
+void Database::loadPolicy() {
+    BankPolicy::loadFromFile(dataDir + "/policy.txt");
+}
+
+const std::unordered_map<int, std::unique_ptr<Customer>>& Database::getCustomers() const {
+    return customers;
 }
 
 Database::~Database() {

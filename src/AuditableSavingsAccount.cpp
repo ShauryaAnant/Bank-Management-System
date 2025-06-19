@@ -4,8 +4,8 @@
 #include <sstream>
 
 AuditableSavingsAccount::AuditableSavingsAccount(int accNo, double initialBalance, Customer* owner,
-                                               double interestRate, const std::string& logFileName)
-    : SavingsAccount(accNo, initialBalance, owner, interestRate, AccountType::AUDITABLE_SAVINGS)
+                                               const std::string& logFileName)
+    : SavingsAccount(accNo, initialBalance, owner, AccountType::AUDITABLE_SAVINGS)
     , Auditable(logFileName) {
     // Log initial account creation
     AuditEntry entry;

@@ -1,11 +1,11 @@
 #include "../include/SavingsAccount.h"
+#include "../include/Customer.h"
 #include <stdexcept>
 
-SavingsAccount::SavingsAccount(int accNo, double initialBalance, Customer* owner, double interestRate, AccountType type)
-    : Account(accNo, initialBalance, owner, type), interestRate(interestRate) {
-    if (interestRate < 0) {
-        throw std::invalid_argument("Interest rate cannot be negative");
-    }
+SavingsAccount::SavingsAccount(int accNo, double initialBalance, Customer* owner,
+                  AccountType type)
+    : Account(accNo, initialBalance, owner, type) {
+    // interestRate parameter removed, use BankPolicy
 }
 
 bool SavingsAccount::deposit(double amount) {
@@ -38,6 +38,6 @@ void SavingsAccount::applyMonthlyUpdate() {
 }
 
 double SavingsAccount::calculateInterest() const {
-    return getBalance() * (interestRate / 12.0); // Monthly interest
+    return getBalance() * BankPolicy::getSavingsInterestRate() / 12.0;
 } 
 
