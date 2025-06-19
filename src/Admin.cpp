@@ -46,14 +46,14 @@ void Admin::showMenu() {
         std::cout << "├───────────────────────────────────┤" << std::endl;
         std::cout << "│                                   │" << std::endl;
         std::cout << "│  1. Change Savings Interest Rate  │" << std::endl;
-        std::cout << "│     (Current: " << BankPolicy::getSavingsInterestRate() << ")";
-        std::cout << std::string(13 - std::to_string(BankPolicy::getSavingsInterestRate()).length(), ' ') << "          │" << std::endl;
+        std::cout << "│     (Current: " << std::fixed << std::setprecision(2) << BankPolicy::getSavingsInterestRate() * 100 << "%)";
+        std::cout << std::string(8 - std::to_string(static_cast<int>(BankPolicy::getSavingsInterestRate() * 100)).length(), ' ') << "       │" << std::endl;
         std::cout << "│  2. Change Current Account Fee    │" << std::endl;
-        std::cout << "│     (Current: " << BankPolicy::getCurrentAccountFee() << ")";
-        std::cout << std::string(16 - std::to_string(BankPolicy::getCurrentAccountFee()).length(), ' ') << "          │" << std::endl;
+        std::cout << "│     (Current: $" << std::fixed << std::setprecision(2) << BankPolicy::getCurrentAccountFee() << ")";
+        std::cout << std::string(11 - std::to_string(static_cast<int>(BankPolicy::getCurrentAccountFee())).length(), ' ') << "    │" << std::endl;
         std::cout << "│  3. Change Auditable Int. Rate    │" << std::endl;
-        std::cout << "│     (Current: " << BankPolicy::getAuditableInterestRate() << ")";
-        std::cout << std::string(13 - std::to_string(BankPolicy::getAuditableInterestRate()).length(), ' ') << "             │" << std::endl;
+        std::cout << "│     (Current: " << std::fixed << std::setprecision(2) << BankPolicy::getAuditableInterestRate() * 100 << "%)";
+        std::cout << std::string(8 - std::to_string(static_cast<int>(BankPolicy::getAuditableInterestRate() * 100)).length(), ' ') << "       │" << std::endl;
         std::cout << "│  4. View All Accounts             │" << std::endl;
         std::cout << "│  5. Change Admin Password         │" << std::endl;
         std::cout << "│  6. Apply Monthly Update          │" << std::endl;
@@ -63,6 +63,12 @@ void Admin::showMenu() {
         std::cout << std::endl;
         std::cout << "Enter your choice: ";
         std::cin >> choice;
+        if (std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid input. Please enter a number.\n";
+            continue;
+        }
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         switch (choice) {
             case 1:
@@ -117,6 +123,13 @@ void Admin::changeSavingsInterestRate() {
     double rate;
     std::cout << "Enter new savings account interest rate (e.g., 0.05 for 5%): ";
     std::cin >> rate;
+    if (std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Invalid input. Please enter a valid number.\n";
+        return;
+    }
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     if (rate < 0) {
         std::cout << "Interest rate cannot be negative.\n";
         return;
@@ -129,6 +142,13 @@ void Admin::changeCurrentAccountFee() {
     double fee;
     std::cout << "Enter new current account monthly fee: ";
     std::cin >> fee;
+    if (std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Invalid input. Please enter a valid number.\n";
+        return;
+    }
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     if (fee < 0) {
         std::cout << "Fee cannot be negative.\n";
         return;
@@ -141,6 +161,13 @@ void Admin::changeAuditableInterestRate() {
     double rate;
     std::cout << "Enter new auditable account interest rate (e.g., 0.01 for 1%): ";
     std::cin >> rate;
+    if (std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Invalid input. Please enter a valid number.\n";
+        return;
+    }
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     if (rate < 0) {
         std::cout << "Interest rate cannot be negative.\n";
         return;

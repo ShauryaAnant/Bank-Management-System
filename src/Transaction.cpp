@@ -243,14 +243,7 @@ void transactionFun(int accountNumber) {
                     std::cout << "Monthly Fee: $" << BankPolicy::getCurrentAccountFee() << "\n";
                 } else if (account->getType() == AccountType::AUDITABLE_SAVINGS) {
                     std::cout << "Interest Rate: " << BankPolicy::getAuditableInterestRate() * 100 << "%\n";
-                    // Show audit log if available
-                    auto auditable = dynamic_cast<AuditableSavingsAccount*>(account);
-                    if (auditable) {
-                        std::cout << "--- Audit Log ---\n";
-                        for (const auto& entry : auditable->getAuditLog()) {
-                            std::cout << entry.timestamp << " | " << entry.action << " | Amount: $" << entry.amount << " | Balance: $" << entry.balance << "\n";
-                        }
-                    }
+                    // No audit log display
                 }
                 break;
             }

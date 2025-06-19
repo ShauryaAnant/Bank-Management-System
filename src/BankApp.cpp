@@ -31,6 +31,12 @@ void BankApp::run() {
         displayMainMenu();
         int choice;
         std::cin >> choice;
+        if (std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid input. Please enter a number.\n";
+            continue;
+        }
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         switch (choice) {
@@ -234,6 +240,12 @@ void BankApp::displayCustomerMenu() {
         std::cout << "Enter your choice: ";
         int choice;
         std::cin >> choice;
+        if (std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid input. Please enter a number.\n";
+            continue;
+        }
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         switch (choice) {
@@ -326,13 +338,17 @@ void BankApp::handleAccountCreation() {
             }   
 
             std::cout << "\n┌─x─x─x─x─x─x─x─x─x─x─x─x─x─x─x─x─x─┐" << std::endl;
+            std::cout << "│                                   │" << std::endl;
             std::cout << "│         Account Creation          │" << std::endl;
+            std::cout << "│                                   │" << std::endl;
             std::cout << "├───────────────────────────────────┤" << std::endl;
             std::cout << "│ Account Created successfully!     │" << std::endl;
+            std::cout << "│                                   │" << std::endl;
             std::cout << "│ Account number: " << std::setw(12) << accnum << "      │" << std::endl;
             std::cout << "│ Account Type: " << std::setw(18) << Database::getInstance()->getAccount(accnum)->getTypeString() << "  │" << std::endl;
             std::cout << "│ Initial Balance: $" << std::fixed << std::setprecision(2) << std::setw(12) 
                       << Database::getInstance()->getAccount(accnum)->getBalance() << "    │" << std::endl;
+            std::cout << "│                                   │" << std::endl;
             std::cout << "└─x─x─x─x─x─x─x─x─x─x─x─x─x─x─x─x─x─┘" << std::endl;
         }
     } catch (const std::exception& e) {
