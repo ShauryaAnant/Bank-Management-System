@@ -227,7 +227,8 @@ void BankApp::displayCustomerMenu() {
         std::cout << "│  1. Create Account          │" << std::endl;
         std::cout << "│  2. Select Account          │" << std::endl;
         std::cout << "│  3. List Accounts           │" << std::endl;
-        std::cout << "│  4. Logout                  │" << std::endl;
+        std::cout << "│  4. Change Password         │" << std::endl;
+        std::cout << "│  5. Logout                  │" << std::endl;
         std::cout << "│                             │" << std::endl;
         std::cout << "└─x─x─x─x─x─x─x─x─x─x─x─x─x─x─┘" << std::endl << std::endl;
         std::cout << "Enter your choice: ";
@@ -250,6 +251,11 @@ void BankApp::displayCustomerMenu() {
                 std::cin.get();
                 break;
             case 4:
+                handleChangePassword();
+                std::cout << "\nPress Enter to continue...";
+                std::cin.get();
+                break;
+            case 5:
                 currentCustomer = nullptr;
                 return;
             default:
@@ -387,4 +393,28 @@ void BankApp::listAccounts() {
         std::cout << "├───────────────────────────────────┤" << std::endl;
     }
     std::cout << "└─x─x─x─x─x─x─x─x─x─x─x─x─x─x─x─x─x─┘\n" << std::endl;
+}
+
+void BankApp::handleChangePassword() {
+    if (!currentCustomer) return;
+    std::string oldPassword, newPassword, confirmPassword;
+    std::cout << "Enter your current password: ";
+    std::getline(std::cin, oldPassword);
+    std::cout << "Enter your new password: ";
+    std::getline(std::cin, newPassword);
+    std::cout << "Confirm your new password: ";
+    std::getline(std::cin, confirmPassword);
+    if (newPassword != confirmPassword) {
+        std::cout << "Passwords do not match. Password not changed." << std::endl;
+        return;
+    }
+    if (!isValidPassword(newPassword)) {
+        std::cout << "Invalid password! Password must be at least 6 characters and include uppercase, lowercase, and numbers." << std::endl;
+        return;
+    }
+    if (Database::getInstance()->changePassword(currentCustomer->getId(), oldPassword, newPassword)) {
+        std::cout << "Password changed successfully!" << std::endl;
+    } else {
+        std::cout << "Current password is incorrect. Password not changed." << std::endl;
+    }
 }

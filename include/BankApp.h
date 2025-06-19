@@ -44,6 +44,8 @@ private:
     // void handleAccountStatement();
     // void handleAccountClosure();
 
+    void handleChangePassword();
+
 public:
     static BankApp* getInstance(const std::string& bankName = "MyBank");
     void run();

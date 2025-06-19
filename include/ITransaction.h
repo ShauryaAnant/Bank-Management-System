@@ -5,7 +5,8 @@
 enum class TransactionType {
     DEPOSIT,
     WITHDRAWAL,
-    TRANSFER
+    TRANSFER,
+    MONTHLY_UPDATE
 };
 
 class ITransaction {

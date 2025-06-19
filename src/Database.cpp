@@ -341,7 +341,8 @@ void Database::getTransactions(int accountNumber, std::ostream& out) const {
             std::string transactionType;
             
             // Determine transaction type and update balance
-            switch (std::stoi(type)) {
+            int typeInt = std::stoi(type);
+            switch (typeInt) {
                 case 0: // Deposit
                     transactionType = "Deposit";
                     runningBalance += amountValue;
@@ -361,6 +362,14 @@ void Database::getTransactions(int accountNumber, std::ostream& out) const {
                         relatedAcc = "To " + relatedAcc;
                     }
                     break;
+                case 3: { // Monthly Update
+                    // For monthly update, parse description from the next field
+                    std::string desc = relatedAcc;
+                    transactionType = desc.empty() ? "Monthly Update" : desc;
+                    runningBalance += amountValue;
+                    relatedAcc = "-";
+                    break;
+                }
                 default:
                     transactionType = "Unknown";
                     break;
@@ -422,38 +431,56 @@ bool Database::changePassword(int customerId, const std::string& oldPassword, co
         if (!file.is_open()) {
             return false;
         }
-        
         std::vector<std::string> lines;
         std::string line;
         bool found = false;
-        
+        std::string updatedUsername;
         while (std::getline(file, line)) {
             std::stringstream ss(line);
-            std::string username, storedPassword, storedId;
-            std::getline(ss, username, ':');
-            std::getline(ss, storedPassword, ':');
-            std::getline(ss, storedId);
-            
-            if (std::stoi(storedId) == customerId) {
-                if (storedPassword != oldPassword) {
-                    return false;
+            std::string type, username, storedPassword, storedId;
+            std::getline(ss, type, ':');
+            if (type == "CUSTOMER") {
+                std::getline(ss, username, ':');
+                std::getline(ss, storedPassword, ':');
+                std::getline(ss, storedId);
+                if (std::stoi(storedId) == customerId) {
+                    if (storedPassword != oldPassword) {
+                        return false;
+                    }
+                    lines.push_back("CUSTOMER:" + username + ":" + newPassword + ":" + storedId);
+                    found = true;
+                    updatedUsername = username;
+                } else {
+                    lines.push_back(line);
                 }
-                lines.push_back(username + ":" + newPassword + ":" + storedId);
-                found = true;
             } else {
                 lines.push_back(line);
             }
         }
-
         if (!found) {
+            // Try in-memory update for users not yet in auth.txt
+            std::string foundUsername;
+            for (const auto& pair : usernameToCustomerId) {
+                if (pair.second == customerId) {
+                    foundUsername = pair.first;
+                    break;
+                }
+            }
+            if (!foundUsername.empty() && usernamePasswords.count(foundUsername) && usernamePasswords[foundUsername] == oldPassword) {
+                usernamePasswords[foundUsername] = newPassword;
+                saveAuthData();
+                return true;
+            }
             return false;
         }
-
         std::ofstream outFile(getAuthFilePath());
         for (const auto& l : lines) {
             outFile << l << std::endl;
         }
-        
+        // Update in-memory password map
+        if (!updatedUsername.empty()) {
+            usernamePasswords[updatedUsername] = newPassword;
+        }
         return true;
     } catch (const std::exception&) {
         return false;
@@ -531,11 +558,19 @@ void Database::saveTransaction(const Account* account, const ITransaction* trans
             saveTransferTransaction(transaction);
             return;
         }
-        
-        file << account->getAccountNumber() << ":" 
-             << transaction->getTimestamp() << ":"
-             << static_cast<int>(transaction->getType()) << ":"
-             << transaction->getAmount() << std::endl;
+        // For monthly update, add description as extra field
+        if (static_cast<int>(transaction->getType()) == 3) {
+            file << account->getAccountNumber() << ":"
+                 << transaction->getTimestamp() << ":"
+                 << static_cast<int>(transaction->getType()) << ":"
+                 << transaction->getAmount() << ":"
+                 << transaction->getDescription() << std::endl;
+        } else {
+            file << account->getAccountNumber() << ":" 
+                 << transaction->getTimestamp() << ":"
+                 << static_cast<int>(transaction->getType()) << ":"
+                 << transaction->getAmount() << std::endl;
+        }
              
         if (!file.good()) {
             throw std::runtime_error("Failed to write transaction data");

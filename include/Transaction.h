@@ -65,4 +65,21 @@ public:
     TransactionType getType() const override { return TransactionType::TRANSFER; }
     int getFromAccount() const { return fromAccount->getAccountNumber(); }
     int getToAccount() const { return toAccount->getAccountNumber(); }
+};
+
+class MonthlyUpdateTransaction : public ITransaction {
+private:
+    Account* account;
+    double amount;
+    std::string timestamp;
+    std::string description; // e.g., "Interest", "Fee"
+    TransactionType type;
+public:
+    MonthlyUpdateTransaction(Account* account, double amount, const std::string& description);
+    bool execute() override { return false; } // Not used for execution
+    bool undo() override { return false; } // Not used for undo
+    std::string getDescription() const override { return description; }
+    double getAmount() const override { return amount; }
+    std::string getTimestamp() const override { return timestamp; }
+    TransactionType getType() const override { return TransactionType::MONTHLY_UPDATE; }
 }; 

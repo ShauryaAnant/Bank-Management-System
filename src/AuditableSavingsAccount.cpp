@@ -1,4 +1,6 @@
 #include "../include/AuditableSavingsAccount.h"
+#include "../include/Database.h"
+#include "../include/Transaction.h"
 #include <chrono>
 #include <iomanip>
 #include <sstream>
@@ -52,9 +54,13 @@ bool AuditableSavingsAccount::withdraw(double amount) {
 }
 
 void AuditableSavingsAccount::applyMonthlyUpdate() {
-    double interest = calculateInterest();
-    SavingsAccount::applyMonthlyUpdate();
-    
+    // Calculate interest using auditable rate
+    double interest = getBalance() * BankPolicy::getAuditableInterestRate() / 12.0;
+    updateBalance(getBalance() + interest);
+    // Record monthly interest as a transaction
+    auto* db = Database::getInstance();
+    auto tx = std::make_unique<MonthlyUpdateTransaction>(this, interest, "Interest");
+    db->addTransaction(getAccountNumber(), std::move(tx));
     // Log monthly update
     AuditEntry entry;
     entry.timestamp = getCurrentTimestamp();
@@ -62,7 +68,6 @@ void AuditableSavingsAccount::applyMonthlyUpdate() {
     entry.amount = interest;
     entry.balance = getBalance();
     auditLog.push_back(entry);
-    
     logAction("Monthly interest of $" + std::to_string(interest) + " applied");
 }
 

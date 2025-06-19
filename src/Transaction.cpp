@@ -88,8 +88,7 @@ void transactionFun(int accountNumber) {
         std::cout << "│  5. Statement               │" << std::endl;
         std::cout << "│  6. Close Account           │" << std::endl;
         std::cout << "│  7. View Account Details    │" << std::endl;
-        std::cout << "│  8. Apply Monthly Update    │" << std::endl;
-        std::cout << "│  9. Return to Main Menu     │" << std::endl;
+        std::cout << "│  8. Return to Main Menu     │" << std::endl;
         std::cout << "│                             │" << std::endl;
         std::cout << "└─x─x─x─x─x─x─x─x─x─x─x─x─x─x─┘" << std::endl << std::endl;
         std::cout << "Enter your choice: ";
@@ -255,28 +254,7 @@ void transactionFun(int accountNumber) {
                 }
                 break;
             }
-            case 8: { // Apply Monthly Update
-                auto account = Database::getAccount(accountNumber);
-                if (!account) {
-                    std::cout << "Account not found.\n";
-                    break;
-                }
-                try {
-                    account->applyMonthlyUpdate();
-                    std::cout << "Monthly update applied. New balance: $" << std::fixed << std::setprecision(2) << account->getBalance() << "\n";
-                    if (account->getType() == AccountType::AUDITABLE_SAVINGS) {
-                        auto auditable = dynamic_cast<AuditableSavingsAccount*>(account);
-                        if (auditable && !auditable->getAuditLog().empty()) {
-                            const auto& entry = auditable->getAuditLog().back();
-                            std::cout << "Latest Audit Log: " << entry.timestamp << " | " << entry.action << " | Amount: $" << entry.amount << " | Balance: $" << entry.balance << "\n";
-                        }
-                    }
-                } catch (const std::exception& e) {
-                    std::cout << "Error applying monthly update: " << e.what() << "\n";
-                }
-                break;
-            }
-            case 9:
+            case 8:
                 return;
             default:
                 std::cout << "Invalid choice. Please try again.\n";
@@ -464,4 +442,13 @@ bool Transfer::undo() {
         return true;
     }
     return false; 
+}
+
+MonthlyUpdateTransaction::MonthlyUpdateTransaction(Account* account, double amount, const std::string& description)
+    : account(account), amount(amount), description(description), type(TransactionType::MONTHLY_UPDATE) {
+    auto now = std::chrono::system_clock::now();
+    auto now_time_t = std::chrono::system_clock::to_time_t(now);
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&now_time_t), "%Y-%m-%d %H-%M-%S");
+    timestamp = ss.str();
 }

@@ -1,5 +1,7 @@
 #include "../include/SavingsAccount.h"
 #include "../include/Customer.h"
+#include "../include/Database.h"
+#include "../include/Transaction.h"
 #include <stdexcept>
 
 SavingsAccount::SavingsAccount(int accNo, double initialBalance, Customer* owner,
@@ -35,6 +37,10 @@ bool SavingsAccount::withdraw(double amount) {
 void SavingsAccount::applyMonthlyUpdate() {
     double interest = calculateInterest();
     updateBalance(getBalance() + interest);
+    // Record monthly interest as a transaction
+    auto* db = Database::getInstance();
+    auto tx = std::make_unique<MonthlyUpdateTransaction>(this, interest, "Interest");
+    db->addTransaction(getAccountNumber(), std::move(tx));
 }
 
 double SavingsAccount::calculateInterest() const {
