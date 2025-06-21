@@ -1,4 +1,4 @@
-#include "../include/BankApp.h"
+#include "../core/BankApp.h"
 #include <iostream>
 #include <stdexcept>
 
