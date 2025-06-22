@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Box, Typography, Paper, TextField, Button, Alert, CircularProgress } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { Box, Typography, TextField, Button, Alert, CircularProgress, Grid } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
+import AuthLayout from '../components/AuthLayout';
 
 const UserLogin = () => {
   const [username, setUsername] = useState('');
@@ -30,44 +31,47 @@ const UserLogin = () => {
   };
 
   return (
-    <Box minHeight="100vh" display="flex" alignItems="center" justifyContent="center" bgcolor="#f5f6fa">
-      <Paper elevation={4} sx={{ p: 6, borderRadius: 4, minWidth: 350, textAlign: 'center' }}>
-        <Typography variant="h4" fontWeight={700} mb={3} color="primary.main">
-          User Login
-        </Typography>
-        <form onSubmit={handleSubmit}>
-          <TextField
-            label="Username"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            fullWidth
-            margin="normal"
-            required
-          />
-          <TextField
-            label="Password"
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            fullWidth
-            margin="normal"
-            required
-          />
-          {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mt: 3 }}
-            disabled={loading}
-            size="large"
-          >
-            {loading ? <CircularProgress size={24} /> : 'Login'}
-          </Button>
-        </form>
-      </Paper>
-    </Box>
+    <AuthLayout title="User Login">
+        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
+            <TextField
+                label="Username"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                fullWidth
+                margin="normal"
+                required
+                autoFocus
+            />
+            <TextField
+                label="Password"
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                fullWidth
+                margin="normal"
+                required
+            />
+            {error && <Alert severity="error" sx={{ mt: 2, width: '100%' }}>{error}</Alert>}
+            <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                sx={{ mt: 3, mb: 2 }}
+                disabled={loading}
+                size="large"
+            >
+                {loading ? <CircularProgress size={24} /> : 'Login'}
+            </Button>
+            <Grid container>
+              <Grid item>
+                <Link to="/user/register" variant="body2">
+                  {"Don't have an account? Sign Up"}
+                </Link>
+              </Grid>
+            </Grid>
+        </Box>
+    </AuthLayout>
   );
 };
 

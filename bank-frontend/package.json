@@ -1,8 +1,9 @@
 {
-  "name": "bank-frontend",
+  "name": "sampatti-bank-frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "description": "Sampatti Bank - Modern Banking Management System Frontend",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

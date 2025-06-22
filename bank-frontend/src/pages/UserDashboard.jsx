@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Drawer, List, ListItem, ListItemIcon, ListItemText, Divider, Grid, Paper, Button, Stack, CircularProgress, Alert, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select, MenuItem, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Box, Typography, Drawer, List, ListItem, ListItemIcon, ListItemText, Divider, Grid, Paper, Button, Stack, CircularProgress, Alert, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select, MenuItem, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ListItemButton } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import LockIcon from '@mui/icons-material/Lock';
@@ -7,6 +7,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
+import sampattiLogo from '../assets/sampatti-logo.svg';
 
 const drawerWidth = 220;
 
@@ -327,14 +328,21 @@ const UserDashboard = () => {
         sx={{
           width: drawerWidth,
           flexShrink: 0,
-          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box', bgcolor: '#3f51b5', color: '#fff' },
+          [`& .MuiDrawer-paper`]: {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            background: 'linear-gradient(180deg, #1976d2 30%, #00bfae 90%)',
+            color: '#fff',
+            border: 'none',
+          },
         }}
       >
-        <Box sx={{ p: 3, textAlign: 'center' }}>
-          <Typography variant="h6" fontWeight={700} color="#fff">ABC Bank</Typography>
+        <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src={sampattiLogo} alt="Sampatti Bank Logo" style={{ width: 40, height: 40, marginRight: 12 }} />
+          <Typography variant="h6" fontWeight={700} color="#fff">Sampatti Bank</Typography>
         </Box>
         <Divider sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
-        <List>
+        <List sx={{ p: 1 }}>
           {navItems.map((item, index) => {
             const handleNavClick = () => {
               if (item.text === 'Dashboard') {
@@ -349,14 +357,26 @@ const UserDashboard = () => {
             };
 
             return (
-              <ListItem 
-                button 
-                key={item.text} 
-                selected={selected === index} 
-                onClick={handleNavClick}
-              >
-                <ListItemIcon sx={{ color: '#fff' }}>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
+              <ListItem key={item.text} disablePadding sx={{ my: 0.5 }}>
+                <ListItemButton
+                  selected={selected === index}
+                  onClick={handleNavClick}
+                  sx={{
+                    borderRadius: 2,
+                    '&.Mui-selected': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                      },
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                  }}
+                >
+                  <ListItemIcon sx={{ color: '#fff', minWidth: 40 }}>{item.icon}</ListItemIcon>
+                  <ListItemText primary={item.text} />
+                </ListItemButton>
               </ListItem>
             );
           })}
@@ -545,23 +565,25 @@ const UserDashboard = () => {
                 <Typography>To close this account, the balance must be zero. Please withdraw or transfer the funds first.</Typography>
               </>
             ) : (
-            <Typography>Are you sure you want to close this account? This action is irreversible.</Typography>
+              <>
+                <Typography>Are you sure you want to close this account? This action is irreversible.</Typography>
+                {closeError && <Alert severity="error" sx={{ mt: 2 }}>{closeError}</Alert>}
+                <TextField
+                  label="PIN"
+                  type="password"
+                  value={closePin}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    setClosePin(value);
+                  }}
+                  fullWidth
+                  required
+                  helperText="Enter your 4-digit account PIN to confirm closure"
+                  inputProps={{ maxLength: 4, pattern: '[0-9]*' }}
+                  sx={{ mt: 2 }}
+                />
+              </>
             )}
-            {closeError && <Alert severity="error" sx={{ mt: 2 }}>{closeError}</Alert>}
-            <TextField
-              label="PIN"
-              type="password"
-              value={closePin}
-              onChange={(e) => {
-                const value = e.target.value.replace(/\D/g, '').slice(0, 4);
-                setClosePin(value);
-              }}
-              fullWidth
-              required
-              helperText="Enter your 4-digit account PIN to confirm closure"
-              inputProps={{ maxLength: 4, pattern: '[0-9]*' }}
-              sx={{ mt: 2 }}
-            />
           </DialogContent>
           <DialogActions>
             <Button onClick={closeClose}>Cancel</Button>

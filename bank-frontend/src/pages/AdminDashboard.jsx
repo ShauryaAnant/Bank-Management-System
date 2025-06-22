@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Drawer, List, ListItem, ListItemText, ListItemIcon, Typography, Paper, Grid, CircularProgress, Alert, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Snackbar, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Divider, Stack, InputAdornment } from '@mui/material';
+import { Box, Drawer, List, ListItem, ListItemText, ListItemIcon, Typography, Paper, Grid, CircularProgress, Alert, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Snackbar, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Divider, Stack, InputAdornment, ListItemButton } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import LockIcon from '@mui/icons-material/Lock';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
@@ -7,6 +7,7 @@ import PolicyIcon from '@mui/icons-material/Policy';
 import UpdateIcon from '@mui/icons-material/Update';
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
+import sampattiLogo from '../assets/sampatti-logo.svg';
 
 const drawerWidth = 240;
 
@@ -232,28 +233,48 @@ const AdminDashboard = () => {
         sx={{
           width: drawerWidth,
           flexShrink: 0,
-          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box', backgroundColor: '#1E3A8A', color: 'white' },
+          [`& .MuiDrawer-paper`]: {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            background: 'linear-gradient(180deg, #1976d2 30%, #00bfae 90%)',
+            color: 'white',
+            border: 'none',
+          },
         }}
       >
-        <Box sx={{ p: 2 }}>
-          <Typography variant="h5" component="div">Admin Panel</Typography>
+        <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+          <img src={sampattiLogo} alt="Sampatti Bank Logo" style={{ width: 40, height: 40, marginBottom: 8 }} />
+          <Typography variant="h6" component="div" fontWeight="bold">Sampatti Bank</Typography>
+          <Typography variant="body2" color="rgba(255,255,255,0.7)">Admin Panel</Typography>
         </Box>
-        <List>
+        <List sx={{ p: 1 }}>
           {navItems.map((item, index) => (
-            <ListItem 
-              button 
-              key={item.text} 
-              selected={selected === index && item.text === 'Dashboard'}
-              onClick={() => {
-                if (item.text === 'Dashboard') setSelected(index);
-                else if (item.text === 'Policy Management') openPolicyDialog();
-                else if (item.text === 'Monthly Update') setMuOpen(true);
-                else if (item.text === 'Change Password') setPwOpen(true);
-                else if (item.text === 'Logout') setLogoutOpen(true);
-              }}
-            >
-              <ListItemIcon sx={{ color: 'white' }}>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+            <ListItem key={item.text} disablePadding sx={{ my: 0.5 }}>
+              <ListItemButton
+                selected={selected === index && item.text === 'Dashboard'}
+                onClick={() => {
+                  if (item.text === 'Dashboard') setSelected(index);
+                  else if (item.text === 'Policy Management') openPolicyDialog();
+                  else if (item.text === 'Monthly Update') setMuOpen(true);
+                  else if (item.text === 'Change Password') setPwOpen(true);
+                  else if (item.text === 'Logout') setLogoutOpen(true);
+                }}
+                sx={{
+                  borderRadius: 2,
+                  '&.Mui-selected': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                    },
+                  },
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItemButton>
             </ListItem>
           ))}
         </List>
