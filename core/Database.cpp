@@ -1,9 +1,9 @@
-#include "../include/Database.h"
-#include "../include/SavingsAccount.h"
-#include "../include/CurrentAccount.h"
-#include "../include/AuditableSavingsAccount.h"
-#include "../include/Transaction.h"
-#include "../include/BankPolicy.h"
+#include "Database.h"
+#include "SavingsAccount.h"
+#include "CurrentAccount.h"
+#include "AuditableSavingsAccount.h"
+#include "Transaction.h"
+#include "BankPolicy.h"
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -491,6 +491,14 @@ bool Database::usernameExists(const std::string& username) const {
     return usernameToCustomerId.find(username) != usernameToCustomerId.end();
 }
 
+int Database::getCustomerIdByUsername(const std::string& username) const {
+    auto it = usernameToCustomerId.find(username);
+    if (it != usernameToCustomerId.end()) {
+        return it->second;
+    }
+    return -1; // Return -1 if username not found
+}
+
 void Database::saveAll() {
     try {
         saveCustomer(nullptr); // Save all customers
@@ -880,6 +888,26 @@ void Database::loadPolicy() {
 
 const std::unordered_map<int, std::unique_ptr<Customer>>& Database::getCustomers() const {
     return customers;
+}
+
+const std::unordered_map<std::string, int>& Database::getUsernameToCustomerId() const {
+    return usernameToCustomerId;
+}
+
+std::vector<Account*> Database::getAccountsByCustomerId(int customerId) const {
+    std::vector<Account*> userAccounts;
+    Customer* customer = findCustomer(customerId);
+    if (customer) {
+        const auto& customerAccounts = customer->getAccounts();
+        for (const auto& account : customerAccounts) {
+            userAccounts.push_back(account.get());
+        }
+    }
+    return userAccounts;
+}
+
+const std::unordered_map<int, Account*>& Database::getAccounts() const {
+    return accounts;
 }
 
 Database::~Database() {

@@ -1,8 +1,8 @@
-#include "../include/Transaction.h"
-#include "../include/Database.h"
-#include "../include/Account.h"
-#include "../include/BankPolicy.h"
-#include "../include/AuditableSavingsAccount.h"
+#include "Transaction.h"
+#include "Database.h"
+#include "Account.h"
+#include "BankPolicy.h"
+#include "AuditableSavingsAccount.h"
 #include <iostream>
 #include <iomanip>
 #include <limits>

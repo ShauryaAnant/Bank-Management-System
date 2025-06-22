@@ -1,7 +1,7 @@
-#include "../include/SavingsAccount.h"
-#include "../include/Customer.h"
-#include "../include/Database.h"
-#include "../include/Transaction.h"
+#include "SavingsAccount.h"
+#include "Customer.h"
+#include "Database.h"
+#include "Transaction.h"
 #include <stdexcept>
 
 SavingsAccount::SavingsAccount(int accNo, double initialBalance, Customer* owner,

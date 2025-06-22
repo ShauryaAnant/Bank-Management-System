@@ -1,6 +1,6 @@
-#include "../include/Admin.h"
-#include "../include/BankPolicy.h"
-#include "../include/Database.h"
+#include "Admin.h"
+#include "BankPolicy.h"
+#include "Database.h"
 #include <iostream>
 #include <fstream>
 #include <limits>
@@ -29,6 +29,11 @@ void Admin::saveCredentials(const std::string& filename) {
     if (file.is_open()) {
         file << adminUsername << '\n' << adminPassword << '\n';
     }
+}
+
+void Admin::setAdminPassword(const std::string& newPassword) {
+    adminPassword = newPassword;
+    saveCredentials();
 }
 
 bool Admin::authenticate(const std::string& username, const std::string& password) {

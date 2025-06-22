@@ -1,4 +1,4 @@
-#include "../include/Account.h"
+#include "Account.h"
 #include <stdexcept>
 
 Account::Account(int accNo, double initialBalance, Customer* owner, AccountType type)

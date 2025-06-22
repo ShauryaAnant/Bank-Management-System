@@ -1,4 +1,4 @@
-#include "../include/BankPolicy.h"
+#include "BankPolicy.h"
 #include <fstream>
 #include <iostream>
 

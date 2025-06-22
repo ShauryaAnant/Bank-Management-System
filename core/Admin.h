@@ -8,6 +8,7 @@ public:
     static void loadCredentials(const std::string& filename = "data/admin.txt");
     static void saveCredentials(const std::string& filename = "data/admin.txt");
     static void applyMonthlyUpdateToAllAccounts();
+    static void setAdminPassword(const std::string& newPassword);
 private:
     static std::string adminUsername;
     static std::string adminPassword;

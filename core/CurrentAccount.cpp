@@ -1,6 +1,6 @@
-#include "../include/CurrentAccount.h"
-#include "../include/Database.h"
-#include "../include/Transaction.h"
+#include "CurrentAccount.h"
+#include "Database.h"
+#include "Transaction.h"
 #include <stdexcept>
 
 CurrentAccount::CurrentAccount(int accNo, double initialBalance, Customer* owner)

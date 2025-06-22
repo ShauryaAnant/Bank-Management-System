@@ -1,4 +1,4 @@
-#include "../include/Customer.h"
+#include "Customer.h"
 #include <algorithm>
 #include <stdexcept>
 

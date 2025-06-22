@@ -1,6 +1,6 @@
-#include "../include/AuditableSavingsAccount.h"
-#include "../include/Database.h"
-#include "../include/Transaction.h"
+#include "AuditableSavingsAccount.h"
+#include "Database.h"
+#include "Transaction.h"
 #include <string>
 
 AuditableSavingsAccount::AuditableSavingsAccount(int accNo, double initialBalance, Customer* owner)

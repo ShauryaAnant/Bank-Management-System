@@ -1,7 +1,7 @@
-#include "../include/BankApp.h"
-#include "../include/Database.h"
-#include "../include/Admin.h"
-#include "../include/Transaction.h"
+#include "BankApp.h"
+#include "Database.h"
+#include "Admin.h"
+#include "Transaction.h"
 #include <iostream>
 #include <limits>
 #include <iomanip>

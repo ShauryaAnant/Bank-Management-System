@@ -10,6 +10,7 @@
 #include <mutex>
 #include <map>
 #include <iostream>
+#include <vector>
 
 class Database {
 private:
@@ -33,7 +34,6 @@ private:
     void createDataDirectory();
     std::string getCustomerFilePath() const;
     std::string getAccountFilePath() const;
-    std::string getTransactionFilePath() const;
     std::string getAuthFilePath() const;
     std::string getCounterFilePath() const;
 
@@ -76,6 +76,7 @@ public:
     bool authenticate(const std::string& username, const std::string& password, int& customerId) const;
     bool changePassword(int customerId, const std::string& oldPassword, const std::string& newPassword);
     bool usernameExists(const std::string& username) const;
+    int getCustomerIdByUsername(const std::string& username) const;
     
     // Data persistence
     void saveAll();
@@ -93,6 +94,14 @@ public:
     
     // Getter for customers
     const std::unordered_map<int, std::unique_ptr<Customer>>& getCustomers() const;
+    
+    // Additional getters
+    const std::unordered_map<std::string, int>& getUsernameToCustomerId() const;
+    std::vector<Account*> getAccountsByCustomerId(int customerId) const;
+    const std::unordered_map<int, Account*>& getAccounts() const;
+    
+    // File path getters
+    std::string getTransactionFilePath() const;
     
     ~Database();
 };
