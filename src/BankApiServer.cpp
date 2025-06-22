@@ -234,13 +234,21 @@ private:
 
     void createAccountHandler(const Rest::Request& request, Http::ResponseWriter response) {
         rapidjson::Document doc;
-        if (doc.Parse(request.body().c_str()).HasParseError() || !doc.HasMember("username") || !doc.HasMember("type") || !doc.HasMember("initialBalance")) {
-            response.send(Http::Code::Bad_Request, R"({"success":false,"message":"Invalid JSON"})");
+        if (doc.Parse(request.body().c_str()).HasParseError() || !doc.HasMember("username") || !doc.HasMember("type") || !doc.HasMember("initialBalance") || !doc.HasMember("pin")) {
+            response.send(Http::Code::Bad_Request, R"({"success":false,"message":"Invalid JSON - missing required fields"})");
             return;
         }
         std::string username = doc["username"].GetString();
         std::string type = doc["type"].GetString();
         double initialBalance = doc["initialBalance"].GetDouble();
+        std::string pin = doc["pin"].GetString();
+        
+        // Validate PIN format (4 digits)
+        if (pin.length() != 4 || !std::all_of(pin.begin(), pin.end(), ::isdigit)) {
+            response.send(Http::Code::Bad_Request, R"({"success":false,"message":"PIN must be exactly 4 digits"})");
+            return;
+        }
+        
         int customerId = Database::getInstance()->getCustomerIdByUsername(username);
         if (customerId == -1) {
             response.send(Http::Code::Not_Found, R"({"success":false,"message":"User not found"})");
@@ -258,7 +266,7 @@ private:
             return;
         }
         int accountNumber = newAccount->getAccountNumber();
-        Database::getInstance()->addAccount(std::move(newAccount), ""); // No password for API
+        Database::getInstance()->addAccount(std::move(newAccount), pin); // Store PIN instead of empty password
         // Record initial deposit as a transaction
         Account* acc = Database::getInstance()->findAccount(accountNumber);
         if (acc && initialBalance > 0) {
@@ -315,10 +323,11 @@ private:
         int accountId = request.param(":id").as<int>();
         rapidjson::Document doc;
         if (doc.Parse(request.body().c_str()).HasParseError() || !doc.HasMember("amount")) {
-            response.send(Http::Code::Bad_Request, R"({"success":false,"message":"Invalid JSON"})");
+            response.send(Http::Code::Bad_Request, R"({"success":false,"message":"Invalid JSON - missing amount"})");
             return;
         }
         double amount = doc["amount"].GetDouble();
+        
         Account* acc = Database::getInstance()->findAccount(accountId);
         bool ok = false;
         if (acc) {
@@ -345,14 +354,22 @@ private:
     void withdrawHandler(const Rest::Request& request, Http::ResponseWriter response) {
         int accountId = request.param(":id").as<int>();
         rapidjson::Document doc;
-        if (doc.Parse(request.body().c_str()).HasParseError() || !doc.HasMember("amount")) {
-            response.send(Http::Code::Bad_Request, R"({"success":false,"message":"Invalid JSON"})");
+        if (doc.Parse(request.body().c_str()).HasParseError() || !doc.HasMember("amount") || !doc.HasMember("pin")) {
+            response.send(Http::Code::Bad_Request, R"({"success":false,"message":"Invalid JSON - missing amount or PIN"})");
             return;
         }
         double amount = doc["amount"].GetDouble();
+        std::string pin = doc["pin"].GetString();
+        
         Account* acc = Database::getInstance()->findAccount(accountId);
         bool ok = false;
         if (acc) {
+            // Verify PIN before allowing transaction
+            if (!Database::verifyPassword(accountId, pin)) {
+                response.send(Http::Code::Unauthorized, R"({"success":false,"message":"Invalid PIN"})");
+                return;
+            }
+            
             auto withdrawal = std::make_unique<Withdrawal>(acc, amount);
             if (withdrawal->execute()) {
                 ok = Database::getInstance()->addTransaction(accountId, std::move(withdrawal));
@@ -376,16 +393,24 @@ private:
     void transferHandler(const Rest::Request& request, Http::ResponseWriter response) {
         int accountId = request.param(":id").as<int>();
         rapidjson::Document doc;
-        if (doc.Parse(request.body().c_str()).HasParseError() || !doc.HasMember("toAccount") || !doc.HasMember("amount")) {
-            response.send(Http::Code::Bad_Request, R"({"success":false,"message":"Invalid JSON"})");
+        if (doc.Parse(request.body().c_str()).HasParseError() || !doc.HasMember("toAccount") || !doc.HasMember("amount") || !doc.HasMember("pin")) {
+            response.send(Http::Code::Bad_Request, R"({"success":false,"message":"Invalid JSON - missing required fields"})");
             return;
         }
         int toAccount = doc["toAccount"].GetInt();
         double amount = doc["amount"].GetDouble();
+        std::string pin = doc["pin"].GetString();
+        
         Account* fromAcc = Database::getInstance()->findAccount(accountId);
         Account* toAcc = Database::getInstance()->findAccount(toAccount);
         bool ok = false;
         if (fromAcc && toAcc) {
+            // Verify PIN before allowing transaction
+            if (!Database::verifyPassword(accountId, pin)) {
+                response.send(Http::Code::Unauthorized, R"({"success":false,"message":"Invalid PIN"})");
+                return;
+            }
+            
             auto transfer = std::make_unique<Transfer>(fromAcc, toAcc, amount);
             if (transfer->execute()) {
                 ok = Database::getInstance()->addTransaction(accountId, std::move(transfer));
@@ -612,6 +637,19 @@ private:
 
     void closeAccountHandler(const Rest::Request& request, Http::ResponseWriter response) {
         int accountId = request.param(":id").as<int>();
+        rapidjson::Document doc;
+        if (doc.Parse(request.body().c_str()).HasParseError() || !doc.HasMember("pin")) {
+            response.send(Http::Code::Bad_Request, R"({"success":false,"message":"Invalid JSON - PIN required"})");
+            return;
+        }
+        std::string pin = doc["pin"].GetString();
+        
+        // Verify PIN before allowing account closure
+        if (!Database::verifyPassword(accountId, pin)) {
+            response.send(Http::Code::Unauthorized, R"({"success":false,"message":"Invalid PIN"})");
+            return;
+        }
+        
         bool ok = Database::getInstance()->removeAccount(accountId);
         rapidjson::StringBuffer sb;
         rapidjson::Writer<rapidjson::StringBuffer> writer(sb);

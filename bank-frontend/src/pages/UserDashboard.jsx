@@ -31,6 +31,7 @@ const UserDashboard = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [createType, setCreateType] = useState('SAVINGS');
   const [createBalance, setCreateBalance] = useState('');
+  const [createPin, setCreatePin] = useState('');
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState('');
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -41,6 +42,7 @@ const UserDashboard = () => {
   const [actionAccount, setActionAccount] = useState(null);
   const [actionAmount, setActionAmount] = useState('');
   const [actionToAccount, setActionToAccount] = useState('');
+  const [actionPin, setActionPin] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState('');
   // Statement
@@ -51,6 +53,7 @@ const UserDashboard = () => {
   // Close account
   const [closeOpen, setCloseOpen] = useState(false);
   const [closeAccount, setCloseAccount] = useState(null);
+  const [closePin, setClosePin] = useState('');
   const [closeLoading, setCloseLoading] = useState(false);
   const [closeError, setCloseError] = useState('');
   // Change password
@@ -99,6 +102,7 @@ const UserDashboard = () => {
     setCreateOpen(true);
     setCreateType('SAVINGS');
     setCreateBalance('');
+    setCreatePin('');
     setCreateError('');
   };
   const handleCreateClose = () => setCreateOpen(false);
@@ -109,6 +113,10 @@ const UserDashboard = () => {
       setCreateError('Enter a valid initial balance.');
       return;
     }
+    if (!createPin || createPin.length !== 4 || !/^\d{4}$/.test(createPin)) {
+      setCreateError('PIN must be exactly 4 digits.');
+      return;
+    }
     setCreateLoading(true);
     try {
       const username = localStorage.getItem('username');
@@ -116,6 +124,7 @@ const UserDashboard = () => {
         username,
         type: createType,
         initialBalance: Number(createBalance),
+        pin: createPin,
       });
       if (res.data.success) {
         setSnackbar({ open: true, message: 'Account created!', severity: 'success' });
@@ -137,6 +146,7 @@ const UserDashboard = () => {
     setActionAccount(acc);
     setActionAmount(amount);
     setActionToAccount('');
+    setActionPin('');
     setActionError('');
     setActionOpen(true);
   };
@@ -148,6 +158,11 @@ const UserDashboard = () => {
       setActionError('Enter a valid amount.');
       return;
     }
+    // Only require PIN for withdraw and transfer operations
+    if (actionType !== 'deposit' && (!actionPin || actionPin.length !== 4 || !/^\d{4}$/.test(actionPin))) {
+      setActionError('PIN must be exactly 4 digits.');
+      return;
+    }
     setActionLoading(true);
     try {
       let url = '', data = {};
@@ -156,7 +171,7 @@ const UserDashboard = () => {
         data = { amount: Number(actionAmount) };
       } else if (actionType === 'withdraw') {
         url = `/accounts/${actionAccount.accountNumber}/withdraw`;
-        data = { amount: Number(actionAmount) };
+        data = { amount: Number(actionAmount), pin: actionPin };
       } else if (actionType === 'transfer') {
         if (!actionToAccount || isNaN(actionToAccount)) {
           setActionError('Enter a valid destination account number.');
@@ -164,7 +179,7 @@ const UserDashboard = () => {
           return;
         }
         url = `/accounts/${actionAccount.accountNumber}/transfer`;
-        data = { toAccount: Number(actionToAccount), amount: Number(actionAmount) };
+        data = { toAccount: Number(actionToAccount), amount: Number(actionAmount), pin: actionPin };
       }
       const res = await api.post(url, data);
       if (res.data.success) {
@@ -204,14 +219,19 @@ const UserDashboard = () => {
   const openClose = (acc) => {
     setCloseOpen(true);
     setCloseAccount(acc);
+    setClosePin('');
     setCloseError('');
   };
   const closeClose = () => setCloseOpen(false);
   const handleCloseAccount = async () => {
+    if (!closePin || closePin.length !== 4 || !/^\d{4}$/.test(closePin)) {
+      setCloseError('PIN must be exactly 4 digits.');
+      return;
+    }
     setCloseLoading(true);
     setCloseError('');
     try {
-      const res = await api.post(`/accounts/${closeAccount.accountNumber}/close`);
+      const res = await api.post(`/accounts/${closeAccount.accountNumber}/close`, { pin: closePin });
       if (res.data.success) {
         setSnackbar({ open: true, message: 'Account closed!', severity: 'success' });
         setCloseOpen(false);
@@ -397,6 +417,19 @@ const UserDashboard = () => {
                 fullWidth
                 required
               />
+              <TextField
+                label="PIN"
+                type="password"
+                value={createPin}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                  setCreatePin(value);
+                }}
+                fullWidth
+                required
+                helperText="Enter a 4-digit PIN for account security"
+                inputProps={{ maxLength: 4, pattern: '[0-9]*' }}
+              />
               <DialogActions>
                 <Button onClick={handleCreateClose}>Cancel</Button>
                 <Button type="submit" variant="contained" disabled={createLoading}>
@@ -430,6 +463,21 @@ const UserDashboard = () => {
                   onChange={(e) => setActionToAccount(e.target.value)}
                   fullWidth
                   required
+                />
+              )}
+              {actionType !== 'deposit' && (
+                <TextField
+                  label="PIN"
+                  type="password"
+                  value={actionPin}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    setActionPin(value);
+                  }}
+                  fullWidth
+                  required
+                  helperText="Enter your 4-digit account PIN"
+                  inputProps={{ maxLength: 4, pattern: '[0-9]*' }}
                 />
               )}
               <DialogActions>
@@ -500,6 +548,20 @@ const UserDashboard = () => {
             <Typography>Are you sure you want to close this account? This action is irreversible.</Typography>
             )}
             {closeError && <Alert severity="error" sx={{ mt: 2 }}>{closeError}</Alert>}
+            <TextField
+              label="PIN"
+              type="password"
+              value={closePin}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                setClosePin(value);
+              }}
+              fullWidth
+              required
+              helperText="Enter your 4-digit account PIN to confirm closure"
+              inputProps={{ maxLength: 4, pattern: '[0-9]*' }}
+              sx={{ mt: 2 }}
+            />
           </DialogContent>
           <DialogActions>
             <Button onClick={closeClose}>Cancel</Button>
