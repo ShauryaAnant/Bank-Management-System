@@ -487,8 +487,14 @@ private:
                 if (type == 2) { // Transfer
                     std::getline(ss, acc2_str, ':');
                     if (acc2_str.empty()) continue;
+                    if(amount < 0) {
                     from_acc = acc1_id;
                     to_acc = std::stoi(acc2_str);
+                    }
+                    else{
+                        from_acc = std::stoi(acc2_str);
+                        to_acc = acc1_id;
+                    }
                 }
 
                 transactions.push_back({(long long)epoch_time, type, amount, from_acc, to_acc, 0.0});
