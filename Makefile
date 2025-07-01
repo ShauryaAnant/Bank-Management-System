@@ -9,7 +9,18 @@ OBJ_DIR = obj
 BIN_DIR = bin
 
 # Source files
-CORE_SRCS = $(wildcard $(CORE_DIR)/*.cpp)
+CORE_SRCS = \
+	core/Account.cpp \
+	core/Admin.cpp \
+	core/AuditableSavingsAccount.cpp \
+	core/BankApp.cpp \
+	core/BankPolicy.cpp \
+	core/CurrentAccount.cpp \
+	core/Customer.cpp \
+	core/Database.cpp \
+	core/SavingsAccount.cpp \
+	core/Transaction.cpp \
+	core/BankInterface.cpp
 SRC_SRCS = $(wildcard $(SRC_DIR)/main.cpp)
 SRCS = $(CORE_SRCS) $(SRC_SRCS)
 OBJS = $(patsubst $(CORE_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(filter $(CORE_DIR)/%.cpp,$(SRCS))) \

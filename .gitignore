@@ -1,0 +1,36 @@
+# Node.js
+node_modules/
+
+# C++/build
+*.o
+*.out
+*.exe
+*.a
+*.so
+*.dll
+*.dylib
+core/*.o
+core/*.out
+core/*.exe
+obj/
+bin/
+
+# C++ Addon
+cpp-addon/build/
+cpp-addon/node_modules/
+cpp-addon/package-lock.json
+
+# Frontend
+bank-frontend/node_modules/
+bank-frontend/package-lock.json
+bank-frontend/dist/
+
+# Data/runtime
+data/
+*.log
+
+# OS/Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/ 
