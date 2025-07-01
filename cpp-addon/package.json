@@ -1,0 +1,12 @@
+{
+  "name": "bank-cpp-addon",
+  "version": "1.0.0",
+  "main": "build/Release/bankaddon.node",
+  "gypfile": true,
+  "dependencies": {
+    "node-addon-api": "^7.0.0"
+  },
+  "scripts": {
+    "build": "node-gyp rebuild --release"
+  }
+} 
