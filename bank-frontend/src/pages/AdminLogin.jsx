@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Box, TextField, Button, Alert, CircularProgress } from '@mui/material';
+import { Box, TextField, Button, Alert, CircularProgress, InputAdornment, IconButton } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import AuthLayout from '../components/AuthLayout';
@@ -7,6 +8,7 @@ import AuthLayout from '../components/AuthLayout';
 const AdminLogin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -33,7 +35,12 @@ const AdminLogin = () => {
 
   return (
     <AuthLayout title="Admin Login">
-      <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
+      <Box
+        component="form"
+        noValidate
+        onSubmit={handleSubmit}
+        sx={{ mt: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+      >
         <TextField
           label="Username"
           value={username}
@@ -42,23 +49,39 @@ const AdminLogin = () => {
           margin="normal"
           required
           autoFocus
+          sx={{ maxWidth: 400 }}
         />
         <TextField
           label="Password"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           value={password}
           onChange={e => setPassword(e.target.value)}
           fullWidth
           margin="normal"
           required
+          sx={{ maxWidth: 400 }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={() => setShowPassword((show) => !show)}
+                  edge="end"
+                  size="large"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
-        {error && <Alert severity="error" sx={{ mt: 2, width: '100%' }}>{error}</Alert>}
+        {error && <Alert severity="error" sx={{ mt: 2, width: '100%', maxWidth: 400 }}>{error}</Alert>}
         <Button
           type="submit"
           variant="contained"
           color="primary"
           fullWidth
-          sx={{ mt: 3, mb: 2 }}
+          sx={{ mt: 3, mb: 2, maxWidth: 400 }}
           disabled={loading}
           size="large"
         >

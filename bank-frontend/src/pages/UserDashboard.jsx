@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Drawer, List, ListItem, ListItemIcon, ListItemText, Divider, Grid, Paper, Button, Stack, CircularProgress, Alert, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select, MenuItem, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ListItemButton } from '@mui/material';
+import { Box, Typography, Drawer, List, ListItem, ListItemIcon, ListItemText, Divider, Grid, Paper, Button, Stack, CircularProgress, Alert, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select, MenuItem, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ListItemButton, InputAdornment, IconButton } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import LockIcon from '@mui/icons-material/Lock';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import sampattiLogo from '../assets/sampatti-logo.svg';
@@ -33,6 +34,7 @@ const UserDashboard = () => {
   const [createType, setCreateType] = useState('SAVINGS');
   const [createBalance, setCreateBalance] = useState('');
   const [createPin, setCreatePin] = useState('');
+  const [showCreatePin, setShowCreatePin] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState('');
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -44,6 +46,7 @@ const UserDashboard = () => {
   const [actionAmount, setActionAmount] = useState('');
   const [actionToAccount, setActionToAccount] = useState('');
   const [actionPin, setActionPin] = useState('');
+  const [showActionPin, setShowActionPin] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState('');
   // Statement
@@ -55,12 +58,15 @@ const UserDashboard = () => {
   const [closeOpen, setCloseOpen] = useState(false);
   const [closeAccount, setCloseAccount] = useState(null);
   const [closePin, setClosePin] = useState('');
+  const [showClosePin, setShowClosePin] = useState(false);
   const [closeLoading, setCloseLoading] = useState(false);
   const [closeError, setCloseError] = useState('');
   // Change password
   const [pwOpen, setPwOpen] = useState(false);
   const [oldPw, setOldPw] = useState('');
   const [newPw, setNewPw] = useState('');
+  const [showOldPw, setShowOldPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
   const [pwLoading, setPwLoading] = useState(false);
   const [pwError, setPwError] = useState('');
   // Logout confirmation
@@ -104,6 +110,7 @@ const UserDashboard = () => {
     setCreateType('SAVINGS');
     setCreateBalance('');
     setCreatePin('');
+    setShowCreatePin(false);
     setCreateError('');
   };
   const handleCreateClose = () => setCreateOpen(false);
@@ -148,6 +155,7 @@ const UserDashboard = () => {
     setActionAmount(amount);
     setActionToAccount('');
     setActionPin('');
+    setShowActionPin(false);
     setActionError('');
     setActionOpen(true);
   };
@@ -221,6 +229,7 @@ const UserDashboard = () => {
     setCloseOpen(true);
     setCloseAccount(acc);
     setClosePin('');
+    setShowClosePin(false);
     setCloseError('');
   };
   const closeClose = () => setCloseOpen(false);
@@ -252,6 +261,8 @@ const UserDashboard = () => {
     setPwOpen(true);
     setOldPw('');
     setNewPw('');
+    setShowOldPw(false);
+    setShowNewPw(false);
     setPwError('');
   };
   const closePw = () => setPwOpen(false);
@@ -439,7 +450,7 @@ const UserDashboard = () => {
               />
               <TextField
                 label="PIN"
-                type="password"
+                type={showCreatePin ? 'text' : 'password'}
                 value={createPin}
                 onChange={(e) => {
                   const value = e.target.value.replace(/\D/g, '').slice(0, 4);
@@ -449,6 +460,20 @@ const UserDashboard = () => {
                 required
                 helperText="Enter a 4-digit PIN for account security"
                 inputProps={{ maxLength: 4, pattern: '[0-9]*' }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle pin visibility"
+                        onClick={() => setShowCreatePin((show) => !show)}
+                        edge="end"
+                        size="large"
+                      >
+                        {showCreatePin ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
               <DialogActions>
                 <Button onClick={handleCreateClose}>Cancel</Button>
@@ -488,7 +513,7 @@ const UserDashboard = () => {
               {actionType !== 'deposit' && (
                 <TextField
                   label="PIN"
-                  type="password"
+                  type={showActionPin ? 'text' : 'password'}
                   value={actionPin}
                   onChange={(e) => {
                     const value = e.target.value.replace(/\D/g, '').slice(0, 4);
@@ -498,6 +523,20 @@ const UserDashboard = () => {
                   required
                   helperText="Enter your 4-digit account PIN"
                   inputProps={{ maxLength: 4, pattern: '[0-9]*' }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle pin visibility"
+                          onClick={() => setShowActionPin((show) => !show)}
+                          edge="end"
+                          size="large"
+                        >
+                          {showActionPin ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               )}
               <DialogActions>
@@ -570,7 +609,7 @@ const UserDashboard = () => {
                 {closeError && <Alert severity="error" sx={{ mt: 2 }}>{closeError}</Alert>}
                 <TextField
                   label="PIN"
-                  type="password"
+                  type={showClosePin ? 'text' : 'password'}
                   value={closePin}
                   onChange={(e) => {
                     const value = e.target.value.replace(/\D/g, '').slice(0, 4);
@@ -581,6 +620,20 @@ const UserDashboard = () => {
                   helperText="Enter your 4-digit account PIN to confirm closure"
                   inputProps={{ maxLength: 4, pattern: '[0-9]*' }}
                   sx={{ mt: 2 }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle pin visibility"
+                          onClick={() => setShowClosePin((show) => !show)}
+                          edge="end"
+                          size="large"
+                        >
+                          {showClosePin ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               </>
             )}
@@ -613,19 +666,47 @@ const UserDashboard = () => {
             <Stack component="form" onSubmit={handlePwSubmit} spacing={2} sx={{ pt: 1 }}>
               <TextField
                 label="Old Password"
-                type="password"
+                type={showOldPw ? 'text' : 'password'}
                 value={oldPw}
                 onChange={(e) => setOldPw(e.target.value)}
                 fullWidth
                 required
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle old password visibility"
+                        onClick={() => setShowOldPw((show) => !show)}
+                        edge="end"
+                        size="large"
+                      >
+                        {showOldPw ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
               <TextField
                 label="New Password"
-                type="password"
+                type={showNewPw ? 'text' : 'password'}
                 value={newPw}
                 onChange={(e) => setNewPw(e.target.value)}
                 fullWidth
                 required
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle new password visibility"
+                        onClick={() => setShowNewPw((show) => !show)}
+                        edge="end"
+                        size="large"
+                      >
+                        {showNewPw ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
               <DialogActions>
                 <Button onClick={closePw}>Cancel</Button>

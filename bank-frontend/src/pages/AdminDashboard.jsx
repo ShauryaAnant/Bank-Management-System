@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Drawer, List, ListItem, ListItemText, ListItemIcon, Typography, Paper, Grid, CircularProgress, Alert, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Snackbar, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Divider, Stack, InputAdornment, ListItemButton } from '@mui/material';
+import { Box, Drawer, List, ListItem, ListItemText, ListItemIcon, Typography, Paper, Grid, CircularProgress, Alert, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Snackbar, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Divider, Stack, InputAdornment, ListItemButton, IconButton } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import LockIcon from '@mui/icons-material/Lock';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import PolicyIcon from '@mui/icons-material/Policy';
 import UpdateIcon from '@mui/icons-material/Update';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import sampattiLogo from '../assets/sampatti-logo.svg';
@@ -43,6 +44,8 @@ const AdminDashboard = () => {
   // Change Password state
   const [oldPw, setOldPw] = useState('');
   const [newPw, setNewPw] = useState('');
+  const [showOldPw, setShowOldPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
   const [pwLoading, setPwLoading] = useState(false);
   const [pwError, setPwError] = useState('');
   
@@ -54,6 +57,10 @@ const AdminDashboard = () => {
   // Monthly Update state
   const [muLoading, setMuLoading] = useState(false);
   const [muError, setMuError] = useState('');
+  
+  // Add state for recent transactions and top holders
+  const [recentTransactions, setRecentTransactions] = useState([]);
+  const [topAccounts, setTopAccounts] = useState([]);
   
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const navigate = useNavigate();
@@ -95,6 +102,15 @@ const AdminDashboard = () => {
           currentAccounts: accs.filter(a => a.type === 1).length,
           auditableSavingsAccounts: accs.filter(a => a.type === 2).length,
           totalBalance: accs.reduce((sum, acc) => sum + acc.balance, 0),
+        });
+        // Top 3 account holders by balance
+        setTopAccounts([...accs].sort((a, b) => b.balance - a.balance).slice(0, 3));
+        // Fetch recent transactions for all accounts (flattened)
+        const txPromises = accs.map(a => api.get(`/accounts/${a.accountNumber}/transactions`).then(res => res.data.transactions || []).catch(() => []));
+        Promise.all(txPromises).then(allTxs => {
+          // Flatten, sort by timestamp desc, take top 8
+          const txs = allTxs.flat().sort((a, b) => b.timestamp - a.timestamp).slice(0, 8);
+          setRecentTransactions(txs);
         });
       }
     } catch (err) {
@@ -279,73 +295,122 @@ const AdminDashboard = () => {
           ))}
         </List>
       </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: '#F3F4F6', minHeight: '100vh' }}>
-        <Typography variant="h4" gutterBottom>Dashboard</Typography>
-        {loading ? <CircularProgress /> : error ? <Alert severity="error">{error}</Alert> : (
-        <>
-            <Grid container spacing={2} mb={3}>
-                <Grid item xs={6} md={2}><Paper sx={{ p: 2, textAlign: 'center' }}><Typography variant="h6">{stats.users}</Typography><Typography>Users</Typography></Paper></Grid>
-                <Grid item xs={6} md={2}><Paper sx={{ p: 2, textAlign: 'center' }}><Typography variant="h6">{stats.totalAccounts}</Typography><Typography>Total Accounts</Typography></Paper></Grid>
-                <Grid item xs={6} md={2}><Paper sx={{ p: 2, textAlign: 'center' }}><Typography variant="h6">{stats.savingsAccounts}</Typography><Typography>Savings</Typography></Paper></Grid>
-                <Grid item xs={6} md={2}><Paper sx={{ p: 2, textAlign: 'center' }}><Typography variant="h6">{stats.currentAccounts}</Typography><Typography>Current</Typography></Paper></Grid>
-                <Grid item xs={6} md={2}><Paper sx={{ p: 2, textAlign: 'center' }}><Typography variant="h6">{stats.auditableSavingsAccounts}</Typography><Typography>Auditable</Typography></Paper></Grid>
-                <Grid item xs={12} md={2}><Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'primary.main', color: 'white' }}><Typography variant="h6">${stats.totalBalance.toFixed(2)}</Typography><Typography>Total Balance</Typography></Paper></Grid>
-            </Grid>
-            
-            <Divider sx={{ my: 3 }} />
-
-            <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                    <Typography variant="h5" gutterBottom>Users</Typography>
-                    <TableContainer component={Paper}>
-                        <Table size="small">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>ID</TableCell>
-                                    <TableCell>Username</TableCell>
-                                    <TableCell>Name</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {users.map(u => (
-                                    <TableRow key={u.id}>
-                                        <TableCell>{u.id}</TableCell>
-                                        <TableCell>{u.username}</TableCell>
-                                        <TableCell>{u.name}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <Typography variant="h5" gutterBottom>Accounts</Typography>
-                    <TableContainer component={Paper}>
-                        <Table size="small">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Acc #</TableCell>
-                                    <TableCell>Owner ID</TableCell>
-                                    <TableCell>Type</TableCell>
-                                    <TableCell align="right">Balance</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {accounts.map(a => (
-                                    <TableRow key={a.accountNumber}>
-                                        <TableCell>{a.accountNumber}</TableCell>
-                                        <TableCell>{a.ownerId}</TableCell>
-                                        <TableCell>{['Sav', 'Cur', 'Aud'][a.type]}</TableCell>
-                                        <TableCell align="right">${a.balance.toFixed(2)}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Grid>
-            </Grid>
-        </>
-        )}
+      <Box component="main" sx={{ flexGrow: 1, p: 0, backgroundColor: '#F3F4F6', minHeight: '100vh' }}>
+        {/* Welcome Message */}
+        <Box sx={{ px: 4, pt: 3, pb: 1 }}>
+          <Typography variant="h5" fontWeight={600} color="primary.main">Welcome, Admin</Typography>
+        </Box>
+        {/* Dashboard Stats */}
+        <Box sx={{ px: 4, pb: 3 }}>
+          <Grid container spacing={3} alignItems="stretch">
+            {[{label: 'Users', value: stats.users}, {label: 'Total Accounts', value: stats.totalAccounts}, {label: 'Savings', value: stats.savingsAccounts}, {label: 'Current', value: stats.currentAccounts}, {label: 'Auditable', value: stats.auditableSavingsAccounts}, {label: 'Total Balance', value: `$${stats.totalBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}].map((stat, idx) => (
+              <Grid item xs={12} sm={6} md={2} key={stat.label}>
+                <Paper sx={{ p: 3, textAlign: 'center', height: 120, minHeight: 120, boxShadow: 3, borderRadius: 3, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                  <Typography variant="h4" color={stat.label === 'Total Balance' ? 'primary.contrastText' : 'primary.main'} sx={stat.label === 'Total Balance' ? { bgcolor: 'primary.main', color: 'white', px: 2, borderRadius: 2 } : {}}>{stat.value}</Typography>
+                  <Typography variant="subtitle1" color="text.secondary">{stat.label}</Typography>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block', textAlign: 'right' }}>
+            Last updated: {new Date().toLocaleString()}
+          </Typography>
+        </Box>
+        <Divider sx={{ my: 2 }} />
+        {/* Main Content: Users, Accounts, Recent Transactions */}
+        <Grid container spacing={3} sx={{ px: 4, pb: 4 }}>
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 3, boxShadow: 2, borderRadius: 3, minHeight: 340 }}>
+              <Typography variant="h6" fontWeight={600} gutterBottom>Users</Typography>
+              <Divider sx={{ mb: 2 }} />
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 'bold' }}>ID</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold' }}>Username</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold' }}>Name</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {users.map(u => (
+                      <TableRow key={u.id}>
+                        <TableCell>{u.id}</TableCell>
+                        <TableCell>{u.username}</TableCell>
+                        <TableCell>{u.name}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 3, boxShadow: 2, borderRadius: 3, minHeight: 340 }}>
+              <Typography variant="h6" fontWeight={600} gutterBottom>Accounts</Typography>
+              <Divider sx={{ mb: 2 }} />
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 'bold' }}>Acc #</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold' }}>Owner ID</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold' }}>Type</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold' }} align="right">Balance</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {accounts.map(a => (
+                      <TableRow key={a.accountNumber}>
+                        <TableCell>{a.accountNumber}</TableCell>
+                        <TableCell>{a.ownerId}</TableCell>
+                        <TableCell>{['Sav', 'Cur', 'Aud'][a.type]}</TableCell>
+                        <TableCell align="right">${a.balance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
+          </Grid>
+        </Grid>
+        {/* Optionally, Top Account Holders below */}
+        <Grid container spacing={3} sx={{ px: 4, pb: 4 }}>
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 3, boxShadow: 2, borderRadius: 3 }}>
+              <Typography variant="h6" fontWeight={600} gutterBottom>Top Account Holders</Typography>
+              <Divider sx={{ mb: 2 }} />
+              {topAccounts.length === 0 ? (
+                <Typography color="text.secondary">No accounts found.</Typography>
+              ) : (
+                <TableContainer>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Acc #</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Owner ID</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Type</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }} align="right">Balance</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {topAccounts.map(a => (
+                        <TableRow key={a.accountNumber}>
+                          <TableCell>{a.accountNumber}</TableCell>
+                          <TableCell>{a.ownerId}</TableCell>
+                          <TableCell>{['Sav', 'Cur', 'Aud'][a.type]}</TableCell>
+                          <TableCell align="right">${a.balance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+            </Paper>
+          </Grid>
+        </Grid>
+        {loading && <CircularProgress sx={{ position: 'absolute', top: '50%', left: '50%' }} />}
+        {error && <Alert severity="error" sx={{ mx: 4 }}>{error}</Alert>}
       </Box>
 
       {/* DIALOGS */}
@@ -433,8 +498,38 @@ const AdminDashboard = () => {
         <form onSubmit={handlePwSubmit}>
           <DialogTitle>Change Admin Password</DialogTitle>
           <DialogContent>
-            <TextField autoFocus margin="dense" label="Old Password" type="password" fullWidth variant="standard" value={oldPw} onChange={(e) => setOldPw(e.target.value)} />
-            <TextField margin="dense" label="New Password" type="password" fullWidth variant="standard" value={newPw} onChange={(e) => setNewPw(e.target.value)} />
+            <TextField autoFocus margin="dense" label="Old Password" type={showOldPw ? 'text' : 'password'} fullWidth variant="standard" value={oldPw} onChange={(e) => setOldPw(e.target.value)}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle old password visibility"
+                      onClick={() => setShowOldPw((show) => !show)}
+                      edge="end"
+                      size="large"
+                    >
+                      {showOldPw ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField margin="dense" label="New Password" type={showNewPw ? 'text' : 'password'} fullWidth variant="standard" value={newPw} onChange={(e) => setNewPw(e.target.value)}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle new password visibility"
+                      onClick={() => setShowNewPw((show) => !show)}
+                      edge="end"
+                      size="large"
+                    >
+                      {showNewPw ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
             {pwError && <Alert severity="error" sx={{ mt: 2 }}>{pwError}</Alert>}
           </DialogContent>
           <DialogActions>
