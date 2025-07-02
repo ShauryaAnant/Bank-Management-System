@@ -112,27 +112,45 @@ From the project root, run:
 ```sh
 npm run install-all
 ```
-This will install dependencies for the backend, C++ addon, and frontend.
+This will install all dependencies for the backend, C++ addon, and frontend in one step.
+
+- If you do **not** use `npm run install-all`, you must install dependencies in each part manually:
+  ```sh
+  # In project root (for backend)
+  npm install
+  # In cpp-addon (for C++ Node addon)
+  cd cpp-addon
+  npm install
+  cd ..
+  # In bank-frontend (for React frontend)
+  cd bank-frontend
+  npm install
+  cd ..
+  ```
 
 #### **Build the C++ Addon**
+
 ```sh
 cd cpp-addon
 npm run build   # or: node-gyp configure build
 cd ..
 ```
+This will produce `build/Release/bankaddon.node` required by the backend.
 
 #### **Start the Backend Server**
 ```sh
 node src/server.js
 ```
-The backend will run on port 9080 by default.
+- The backend will run on **port 9080** by default.
+- Access API endpoints at: `http://localhost:9080`
 
 #### **Start the Frontend**
 ```sh
 cd bank-frontend
 npm run dev
 ```
-The frontend will run on its own port (e.g., http://localhost:5173).
+- The frontend will run on **port 5173** by default (Vite dev server).
+- Access the app at: `http://localhost:5173`
 
 ---
 
