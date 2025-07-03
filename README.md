@@ -154,6 +154,15 @@ npm run dev
 
 ---
 
+## Admin Default Credentials (For Testing)
+
+- **Username:** `admin`
+- **Password:** `admin123`
+
+Use these credentials to log in as an admin for testing purposes in both the console and web applications.
+
+---
+
 ## OOP Principles Demonstrated (C++ Core)
 
 - **Encapsulation:**  All data members are private/protected. Access is provided via public methods. Validation is enforced in constructors and setters.
@@ -165,6 +174,38 @@ npm run dev
 - **Singleton Pattern:**  `Database` and `BankApp` are implemented as singletons to ensure a single point of access.
 
 ---
+
+
+## Application Screenshots
+
+### Console Application
+
+Screenshots from the C++ standalone console application:
+
+#### Main Menu:
+  ![Main Menu](assets/Console_Application/Main%20Menu.png)
+#### Admin Menu:
+  ![Admin Menu](assets/Console_Application/Admin%20Menu.png)
+#### Customer Menu:
+  ![Customer Menu](assets/Console_Application/Customer%20Menu.png)
+#### Transaction Menu:
+  ![Transaction Menu](assets/Console_Application/TransactionMenu.png)
+
+### Web Application
+
+Screenshots from the modern React web application:
+
+#### Landing Page:
+  ![Landing Page](assets/Web_Application/LandingPage.png)
+#### Admin Dashboard:
+  ![Admin Dashboard](assets/Web_Application/AdminDashboard.png)
+#### User Dashboard:
+  ![User Dashboard](assets/Web_Application/UserDashboard.png)
+#### Bank Statement:
+  ![Bank Statement](assets/Web_Application/BankStatement.png)
+
+---
+
 
 ## Tech Stack
 
@@ -195,3 +236,5 @@ npm run dev
 - Gitansh Bansal
 
 ---
+
+
