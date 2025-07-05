@@ -105,7 +105,7 @@ To run this project locally, you need:
 - **npm** (comes with Node.js)
 - **C++ compiler** (e.g., g++ for Linux/macOS, MSVC for Windows)
 - **Python 3** (required for node-gyp)
-- **make** (for building the C++ console app)finaql 
+- **make** (for building the C++ console app) 
 
 > **Windows users:** For best compatibility, use [WSL](https://docs.microsoft.com/en-us/windows/wsl/) (Windows Subsystem for Linux) or [Git Bash](https://gitforwindows.org/) to run build commands and install dependencies.
 
