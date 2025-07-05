@@ -97,6 +97,20 @@ Bank-Management-System/
 
 ---
 
+## 🛠️ Requirements
+
+To run this project locally, you need:
+
+- **Node.js** (v18 or higher recommended)
+- **npm** (comes with Node.js)
+- **C++ compiler** (e.g., g++ for Linux/macOS, MSVC for Windows)
+- **Python 3** (required for node-gyp)
+- **make** (for building the C++ console app)finaql 
+
+> **Windows users:** For best compatibility, use [WSL](https://docs.microsoft.com/en-us/windows/wsl/) (Windows Subsystem for Linux) or [Git Bash](https://gitforwindows.org/) to run build commands and install dependencies.
+
+---
+
 ## How to Build & Run
 
 ### 1. Standalone Console Application (C++)
