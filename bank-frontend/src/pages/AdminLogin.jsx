@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, TextField, Button, Alert, CircularProgress, InputAdornment, IconButton } from '@mui/material';
+import { Box, TextField, Button, Alert, CircularProgress, InputAdornment, IconButton, Typography } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
@@ -35,6 +35,15 @@ const AdminLogin = () => {
 
   return (
     <AuthLayout title="Admin Login">
+      <Box sx={{ mb: 2, width: '100%', maxWidth: 400, background: '#e3f2fd', borderRadius: 2, p: 2, textAlign: 'center', border: '1px solid #90caf9' }}>
+        <Typography variant="subtitle2" color="primary" fontWeight={600}>
+          Default Admin Credentials (for testing):
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Username: <b>admin</b><br />
+          Password: <b>admin123</b>
+        </Typography>
+      </Box>
       <Box
         component="form"
         noValidate
