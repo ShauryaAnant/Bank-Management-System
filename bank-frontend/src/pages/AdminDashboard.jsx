@@ -16,7 +16,6 @@ const navItems = [
   { text: 'Dashboard', icon: <DashboardIcon /> },
   { text: 'Policy Management', icon: <PolicyIcon /> },
   { text: 'Monthly Update', icon: <UpdateIcon /> },
-  { text: 'Change Password', icon: <LockIcon /> },
   { text: 'Logout', icon: <ExitToAppIcon /> },
 ];
 
@@ -36,18 +35,9 @@ const AdminDashboard = () => {
   const [error, setError] = useState('');
   
   // Dialog states
-  const [pwOpen, setPwOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [policyOpen, setPolicyOpen] = useState(false);
   const [muOpen, setMuOpen] = useState(false);
-  
-  // Change Password state
-  const [oldPw, setOldPw] = useState('');
-  const [newPw, setNewPw] = useState('');
-  const [showOldPw, setShowOldPw] = useState(false);
-  const [showNewPw, setShowNewPw] = useState(false);
-  const [pwLoading, setPwLoading] = useState(false);
-  const [pwError, setPwError] = useState('');
   
   // Policy state
   const [policy, setPolicy] = useState({});
@@ -208,34 +198,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const handlePwSubmit = async (e) => {
-    e.preventDefault();
-    setPwLoading(true);
-    setPwError('');
-
-    const creds = getAdminCredentials();
-    if (!creds) return;
-
-    try {
-      const res = await api.post('/admin/change-password', {
-        username: creds.username,
-        oldPassword: oldPw,
-        newPassword: newPw,
-      });
-      if (res.data.success) {
-        localStorage.setItem('admin_password', newPw);
-        setSnackbar({ open: true, message: 'Password changed successfully!', severity: 'success' });
-        setPwOpen(false);
-      } else {
-        setPwError(res.data.message || 'Failed to change password.');
-      }
-    } catch (err) {
-      setPwError(err.response?.data?.message || 'Server error');
-    } finally {
-      setPwLoading(false);
-    }
-  };
-
   const handleLogout = () => {
     localStorage.removeItem('admin_username');
     localStorage.removeItem('admin_password');
@@ -272,7 +234,6 @@ const AdminDashboard = () => {
                   if (item.text === 'Dashboard') setSelected(index);
                   else if (item.text === 'Policy Management') openPolicyDialog();
                   else if (item.text === 'Monthly Update') setMuOpen(true);
-                  else if (item.text === 'Change Password') setPwOpen(true);
                   else if (item.text === 'Logout') setLogoutOpen(true);
                 }}
                 sx={{
@@ -487,58 +448,6 @@ const AdminDashboard = () => {
           </DialogActions>
       </Dialog>
 
-      <Dialog 
-        open={pwOpen} 
-        onClose={() => setPwOpen(false)}
-        maxWidth="sm"
-        PaperProps={{
-          sx: { position: 'relative', zIndex: 1300 }
-        }}
-      >
-        <form onSubmit={handlePwSubmit}>
-          <DialogTitle>Change Admin Password</DialogTitle>
-          <DialogContent>
-            <TextField autoFocus margin="dense" label="Old Password" type={showOldPw ? 'text' : 'password'} fullWidth variant="standard" value={oldPw} onChange={(e) => setOldPw(e.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle old password visibility"
-                      onClick={() => setShowOldPw((show) => !show)}
-                      edge="end"
-                      size="large"
-                    >
-                      {showOldPw ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField margin="dense" label="New Password" type={showNewPw ? 'text' : 'password'} fullWidth variant="standard" value={newPw} onChange={(e) => setNewPw(e.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle new password visibility"
-                      onClick={() => setShowNewPw((show) => !show)}
-                      edge="end"
-                      size="large"
-                    >
-                      {showNewPw ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            {pwError && <Alert severity="error" sx={{ mt: 2 }}>{pwError}</Alert>}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setPwOpen(false)}>Cancel</Button>
-            <Button type="submit" disabled={pwLoading}>{pwLoading ? <CircularProgress size={24} /> : 'Change'}</Button>
-          </DialogActions>
-        </form>
-      </Dialog>
-      
       <Dialog 
         open={logoutOpen} 
         onClose={() => setLogoutOpen(false)}
