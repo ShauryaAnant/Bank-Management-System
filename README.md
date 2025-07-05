@@ -1,6 +1,13 @@
 # Sampatti Bank - Bank Management System
 
-A comprehensive project featuring both a C++ standalone console application and a modern full stack web application for bank management. This project demonstrates all fundamental Object-Oriented Programming (OOP) principles and provides a real-world banking experience for both end-users and administrators.
+---
+
+## 🚀 Live Deployment
+
+- **Frontend (React App):** [http://4.213.156.111:3000](http://4.213.156.111:3000)
+- **Backend (API):** [http://4.213.156.111:9080/ping](http://4.213.156.111:9080/ping)
+
+> _Note: These are public demo deployments running on Azure. For security, do not use real credentials._
 
 ---
 
@@ -142,15 +149,15 @@ This will produce `build/Release/bankaddon.node` required by the backend.
 node src/server.js
 ```
 - The backend will run on **port 9080** by default.
-- Access API endpoints at: `http://localhost:9080`
+- Access API endpoints at: `http://localhost:9080` or your public IP (e.g., `http://4.213.156.111:9080`)
 
 #### **Start the Frontend**
 ```sh
 cd bank-frontend
 npm run dev
 ```
-- The frontend will run on **port 5173** by default (Vite dev server).
-- Access the app at: `http://localhost:5173`
+- The frontend will run on **port 5173** by default (Vite dev server), or **port 3000** in production (`serve dist 3000`).
+- Access the app at: `http://localhost:5173` (dev) or `http://4.213.156.111:3000` (public demo)
 
 ---
 
